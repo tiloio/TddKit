@@ -1,3 +1,13 @@
+## Current features
+
+- Choose directory where to run all `.test.js` files
+- Prints successful and failed tests with erros
+- only jest `test()`function is supported
+- can run CommonJS and ESM (but no auto detection yet)
+- runs everything in parallel
+- test file size is limited (don't know the limit now, but `9.5mb` was too much, see todos)
+- currently: performance measuring against Jest, its more than 100% faster in simple test use cases (need to explore more complex scenarios)
+
 ## Todo
 
 - [ ] huge-mega: `Command finished with error: fork/exec /Users/tilo/.nvm/versions/node/v16.10.0/bin/node: argument list too long`need to switch from eval to file execution if too large for eval

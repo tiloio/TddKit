@@ -1,0 +1,2 @@
+exports.someDep = Math.random();
+

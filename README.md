@@ -8,6 +8,34 @@
 - test file size is limited (don't know the limit now, but `9.5mb` was too much, see todos)
 - currently: performance measuring against Jest, its more than 100% faster in simple test use cases (need to explore more complex scenarios)
 
+## Future features
+
+- use esbuild to be able to run typescript
+- fake `console.` and `process.stdout` functions to collect the logs and return it to the Go process via the result JSON
+- implement all Jest test: `describe`, `describe.each`, `test.each`, `test.todo`, `xtest`, `xdescribe`, etc. (see all https://jestjs.io/docs/api)
+- implement Jest setup methods like `beforeEach`, `afterAll`, etc. (see all https://jestjs.io/docs/api)
+- include Jest `expect` for easy expectations and thinkg of a own assertion library or search on which solves our need (also for the future WebServer)
+- define resources via JavaScript function à la `TestResources([resource1, resourc2]);` for each test file. Therefore we do two runs of every test file: 
+    1. Run will inject fake `test();` etc functions which do execute nothing and the `TestResource();` function which will print every resource to stdout, so that the Go process can collect and create all needed resources. (Therefore the creationFunction of the resources have to be the same.)
+    2. Run will inject real `test();` etc functions and a fake `TestResource();` function. Then it will execute all test.
+- sort test files according to needed resources and run the files with the least needed resources first
+- create resources in the background while the other tests are running
+- collect logs of resources and tests in one global `log.file`
+- build dependency tree of resources; you can define a resource depends on another resource (e.g. the WebApp-Server depnends on the MySql-Database). And execute the test files which the least dependen resources
+- define test dependencies like `TestResources();` you get a function `TestDependencies(['./anotherTest.js', ''../a/second/test.js])`
+- do `export const aTestDependencies = TestDependencies(['./anotherTest.js']);` to import this dependencies into another file. This helps you to define a dependency tree and this helps the IDE to support you by importing other dependencies.
+- build dependency graph of all test files and include resources to get a path how to run your test most efficiently.
+- build test history in defined directory. For each test run we will build a JSON file which includes the runtime and name of the test, the testfile, the dependencies of the file and the resources of the file. This file will be saved with the date into that directory.
+- use the histories to detect flaky tests
+- rerurn flaky tests (or other failing tests)
+- create `--settings` (`settings.json`, `settings.js` or `settings.ts`) file which will define how the framework behaves
+- autodetect settings and tests frome the directory where you start the process via cli
+- build a WebServer `http://localhost:5000` which will have a nice UI to show:
+    - what test fails why (IntelliJ like `assert.equal` comparison but better)
+    - what resource logs what and connect it to failures (if there is an error or something)
+    - what test did not run because a dependent test failed
+
+
 ## Todo
 
 - [ ] huge-mega: `Command finished with error: fork/exec /Users/tilo/.nvm/versions/node/v16.10.0/bin/node: argument list too long`need to switch from eval to file execution if too large for eval

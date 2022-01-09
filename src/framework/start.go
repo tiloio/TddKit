@@ -4,12 +4,12 @@ import (
 	_ "embed"
 	"log"
 	"flag"
-	"path/filepath"
+	"github.com/mattn/go-zglob"
 )
 
 var dirToSearch = flag.String("path", ".", "Path")
 var globPattern = flag.String("glob", "/**/*.test.js", "Glob")
-var esModule = flag.Bool("esm", false, "Is code es module?")
+var EsModule = flag.Bool("esm", false, "Is code es module?")
 
 func main() {
     flag.Parse()
@@ -18,7 +18,7 @@ func main() {
 
 	var files []string
 
-	files, err := filepath.Glob(path)
+	files, err := zglob.Glob(path)
 	 // todo check for nil
 	if err != nil {
 		log.Fatal("Could not read files of path:", err)

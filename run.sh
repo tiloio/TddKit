@@ -6,8 +6,8 @@ DEFAULT_GLOB='**/*.test.js'
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 TEST_PATH="$DEFAULT_PATH/${1:-$DEFAULT_DIR}"
-GLOB=${2:-$DEFAULT_GLOB}
-ESM=${3:-false}
+ESM=${2:-false}
+GLOB=${3:-$DEFAULT_GLOB}
 EXECUTABLE="$DIR/src/framework"
 
 echo "Run $EXECUTABLE go run . -path \"$TEST_PATH\" -glob \"$GLOB\" -esm=$ESM"

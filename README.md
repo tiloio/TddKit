@@ -11,6 +11,7 @@
 ## Future features
 
 - use esbuild to be able to run typescript
+- in memory sourcemap with correct paths
 - good logging
 - fake `console.` and `process.stdout` functions to collect the logs and return it to the Go process via the result JSON
 - implement all Jest test: `describe`, `describe.each`, `test.each`, `test.todo`, `xtest`, `xdescribe`, etc. (see all https://jestjs.io/docs/api)
@@ -39,7 +40,7 @@
 
 ## Todo
 
-- [ ]
+- [ ] Stacktrace should have lines of actual files, not of builded esbuild stuff. Using sourcemap does not work quite good, node prints `eval` as source.
 
 ## Performance
 

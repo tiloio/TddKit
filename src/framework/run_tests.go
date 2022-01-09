@@ -11,7 +11,7 @@ import (
 )
 
 //go:embed adapters/node/index.js
-var nodeRequire string
+var nodeRequire []byte
 var byteNewLine = []byte("\n")
 
 
@@ -31,13 +31,19 @@ func executeTest(file *string) *exec.Cmd {
 		log.Fatal("Could not read", file, "got err:", err)
 	}
 
-	var tests = nodeRequire + string(fileContent)
-
+	var cmd *exec.Cmd
 	if *esModule {
-		return exec.Command("node", "--input-type=module", "--eval", tests)
+		cmd = exec.Command("node", "--input-type=module", "-")
 	} else {
-		return exec.Command("node", "--eval", tests)
+		cmd = exec.Command("node", "-")
 	}
+
+	buffer := bytes.Buffer{}
+	buffer.Write(nodeRequire)
+	buffer.Write(fileContent)
+	cmd.Stdin = &buffer
+
+	return cmd
 }
 
 func RunTest(file *string, resultChannel chan FileResult) {

@@ -11,6 +11,7 @@
 ## Future features
 
 - use esbuild to be able to run typescript
+- good logging
 - fake `console.` and `process.stdout` functions to collect the logs and return it to the Go process via the result JSON
 - implement all Jest test: `describe`, `describe.each`, `test.each`, `test.todo`, `xtest`, `xdescribe`, etc. (see all https://jestjs.io/docs/api)
 - implement Jest setup methods like `beforeEach`, `afterAll`, etc. (see all https://jestjs.io/docs/api)
@@ -38,8 +39,7 @@
 
 ## Todo
 
-- [ ] huge-mega: `Command finished with error: fork/exec /Users/tilo/.nvm/versions/node/v16.10.0/bin/node: argument list too long`need to switch from eval to file execution if too large for eval
-
+- [ ]
 
 ## Performance
 

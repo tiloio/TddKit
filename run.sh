@@ -2,7 +2,7 @@
 
 DEFAULT_PATH='../test_examples'
 DEFAULT_DIR='simple'
-DEFAULT_GLOB='**/*.test.js'
+DEFAULT_GLOB='/**/*.test.[tj]s'
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 TEST_PATH="$DEFAULT_PATH/${1:-$DEFAULT_DIR}"

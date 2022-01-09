@@ -3,15 +3,17 @@ package main
 import (
 	_ "embed"
 	"log"
+	"path/filepath"
 	"os/exec"
-	"bytes"
+	// "bytes"
 	"github.com/evanw/esbuild/pkg/api"
+    "os"
 )
 
 //go:embed adapters/node/index.js
-var nodeRequire string
+var nodeRequire2 string
 
-func ExecuteEcmascriptTests(file *string) *[]byte {
+func ExecuteEcmascriptTestsFs(file *string) *[]byte {
 
 	log.Println("FILE", *file)
 
@@ -21,18 +23,23 @@ func ExecuteEcmascriptTests(file *string) *[]byte {
 		format = api.FormatESModule
 	}
 
+	tempDir, err := os.MkdirTemp("", "test-framework")
+	defer os.RemoveAll(tempDir)
+
+	const testFileName  = "test.js"
+	var testFilePath = filepath.Join(tempDir, testFileName)
+
 	result := api.Build(api.BuildOptions{
 		EntryPoints: []string{*file},
-		Write:       false,
-		Outdir:      "out",
+		Write:       true,
+		Outfile: 	testFilePath,
 		Bundle:      true,
 		Platform: 	 api.PlatformNode,
 		Sourcemap:   api.SourceMapInline,
 		Format: 	 format,
 		Banner: map[string]string{
-			"js":  nodeRequire,
+			"js":  nodeRequire2,
 		  },
-		LegalComments: api.LegalCommentsNone,
 	  })
 	
 	if len(result.Errors) > 0 {
@@ -49,14 +56,16 @@ func ExecuteEcmascriptTests(file *string) *[]byte {
 
 	var cmd *exec.Cmd
 	if *EsModule {
-		cmd = exec.Command("node", "--enable-source-maps", "--input-type=module", "-")
+		cmd = exec.Command("node", "--enable-source-maps", "--input-type=module", testFilePath)
 	} else {
-		cmd = exec.Command("node", "--enable-source-maps", "-")
+		cmd = exec.Command("node", "--enable-source-maps", testFilePath)
 	}
 
-	buffer := bytes.Buffer{}
-	buffer.Write(result.OutputFiles[0].Contents)
-	cmd.Stdin = &buffer
+	//cmd.Dir = filepath.Dir(*file)
+
+	//buffer := bytes.Buffer{}
+	//buffer.Write(result.OutputFiles[0].Contents)
+	//cmd.Stdin = &buffer
 	stdoutAndStderr, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Println("Command finished with error:", err)

@@ -18,6 +18,8 @@ type FileResult struct {
 	errors int 
 }
 
+var byteNewLine = []byte("\n")
+
 func RunTest(file *string, resultChannel chan FileResult) {
 	absolutePath, err := filepath.Abs(*file)
 	if err != nil {

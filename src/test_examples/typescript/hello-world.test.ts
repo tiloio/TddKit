@@ -1,10 +1,7 @@
-const {helloWorld} = require('./hello-world');
-const assert = require('assert');
+import {helloWorld} from './hello-world';
+import assert from 'assert';
 
-/** comments i like
- */
 test("returns name", () => {
-    //! a comment
     const text = helloWorld('test framework');
 
     assert.equal(text, 'Hello test framework');

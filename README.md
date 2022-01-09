@@ -40,9 +40,21 @@
 
 ## Todo
 
-- [ ] Stacktrace should have lines of actual files, not of builded esbuild stuff. Using sourcemap does not work quite good, node prints `eval` as source.
+- [ ] Stacktrace should have lines of actual files, not of builded esbuild stuff. Using sourcemap does not work quite good, node prints `eval` as source. Maybe solveable if we search all `[stdin]` logs and replace them with the last `// ./file.xy` comment of the mentioned line. Then substract the comment rowcount from that line...
+- [ ] `Run /Users/tilo/workspace/test-framework/src/framework go run . -path "../test_examples/max" -glob "/**/*.test.[tj]s" -esm=true` fails with `Error: Dynamic require of "assert" is not supported` -> does not appear if we run it on the file system 🤷🏽‍♂️
 
 ## Performance
+
+```
+user    0m53.675s
+sys     0m12.572s
+
+Running FRAMEWORK with file creation 100 times on /Users/tilo/workspace/test-framework/src/test_examples/max
+
+real    0m31.063s
+user    1m17.018s
+sys     0m13.433s
+```
 
 ```
 // Added Glob search to FRAMEWORK

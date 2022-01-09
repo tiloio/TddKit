@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-TARGET_DIR="$DIR/$1"
+TARGET_DIR="$DIR/${1:-simple}"
 TIMES=${2:-10}
 
 

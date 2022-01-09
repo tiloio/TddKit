@@ -3,42 +3,25 @@ package main
 import (
 	_ "embed"
 	"log"
-	"io/fs"
 	"flag"
 	"path/filepath"
-	"strings"
 )
 
-
 var dirToSearch = flag.String("path", ".", "Path")
+var globPattern = flag.String("glob", "/**/*.test.js", "Glob")
 var esModule = flag.Bool("esm", false, "Is code es module?")
 
 func main() {
     flag.Parse()
-	var path, err = filepath.Abs(*dirToSearch)
-	if err != nil {
-		log.Fatal(err)
-	}
+	var path = *dirToSearch + *globPattern
+	log.Println("Searching", path)
 
 	var files []string
 
-
-	log.Println("Search dir", path)
-	 err = filepath.WalkDir(*dirToSearch, func(path string, info fs.DirEntry, err error) error {
-		if err != nil {
-			log.Printf("prevent panic by handling failure accessing a path %q: %v\n", path, err)
-			return err
-		}
-
-		if strings.HasSuffix(path, ".test.js") {
-			files = append(files, path)
-		}
-
-		return nil
-	})
+	files, err := filepath.Glob(path)
+	 // todo check for nil
 	if err != nil {
-		log.Printf("error walking the path %q: %v\n", dirToSearch, err)
-		return
+		log.Fatal("Could not read files of path:", err)
 	}
 
 	log.Println("Found", len(files), "files\n")

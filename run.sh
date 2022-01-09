@@ -1,10 +1,16 @@
 #!/bin/bash
 
+DEFAULT_PATH='../test_examples'
+DEFAULT_DIR='simple'
+DEFAULT_GLOB='**/*.test.js'
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-NAME=${1:-simple}
-ESM=${2:-false}
-EXEC_DIR="$DIR/src/test_examples/$NAME"
+TEST_PATH="$DEFAULT_PATH/${1:-$DEFAULT_DIR}"
+GLOB=${2:-$DEFAULT_GLOB}
+ESM=${3:-false}
 EXECUTABLE="$DIR/src/framework"
 
+echo "Run $EXECUTABLE go run . -path \"$TEST_PATH\" -glob \"$GLOB\" -esm=$ESM"
+
 cd "$EXECUTABLE"
-time go run . -path $EXEC_DIR -esm=$ESM
+time go run . -path "$TEST_PATH" -glob "$GLOB" -esm=$ESM

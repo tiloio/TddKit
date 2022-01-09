@@ -1,6 +1,6 @@
 ## Current features
 
-- Choose directory where to run all `.test.js` files
+- Choose directory via `-path=your/directory` where to run all `.test.js` files or use `-glob=*/**.spec.js` to define your own [glob pattern](https://en.wikipedia.org/wiki/Glob_(programming))
 - Prints successful and failed tests with erros
 - only jest `test()`function is supported
 - can run CommonJS and ESM (but no auto detection yet)
@@ -42,6 +42,24 @@
 - [ ]
 
 ## Performance
+
+```
+// Added Glob search to FRAMEWORK
+// 100 runs each: 3 Tests, 1 Failing
+Running JEST 100 times on /Users/tilo/workspace/test-framework/src/test_examples/simple
+Cleared /private/var/folders/61/8w59p_ss67z9799jv3t03w400000gn/T/jest_dx
+
+real    1m9.566s
+user    0m54.219s
+sys     0m11.987s
+
+Running FRAMEWORK 100 times on /Users/tilo/workspace/test-framework/src/test_examples/simple
+
+real    0m1.152s
+user    0m0.355s
+sys     0m0.278s
+```
+
 
 ```
 // 10 runs each: 1502 Tests, random (around 700) Failing

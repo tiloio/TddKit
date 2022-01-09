@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-TARGET_DIR="$DIR/$1"
+TARGET_DIR="$DIR/${1:-simple}"
 EXECUTABLE="$DIR/../../dist/runTests"
 ROOT_DIR="$DIR/../../"
 TIMES=${2:-10}

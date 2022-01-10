@@ -45,6 +45,8 @@
 ## Performance
 
 ```
+Running FRAMEWORK with stdin 100 times on /Users/tilo/workspace/test-framework/src/test_examples/max
+
 user    0m53.675s
 sys     0m12.572s
 

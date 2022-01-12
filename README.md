@@ -5,7 +5,6 @@
 - only jest `test()`function is supported
 - can run CommonJS and ESM (but no auto detection yet)
 - runs everything in parallel
-- test file size is limited (don't know the limit now, but `9.5mb` was too much, see todos)
 - currently: performance measuring against Jest, its more than 100% faster in simple test use cases (need to explore more complex scenarios)
 
 ## Future features
@@ -95,6 +94,8 @@ Server has to run everytime in background
 ## Performance
 
 ```
+Running FRAMEWORK with stdin 100 times on /Users/tilo/workspace/test-framework/src/test_examples/max
+
 user    0m53.675s
 sys     0m12.572s
 

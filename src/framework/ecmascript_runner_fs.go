@@ -10,8 +10,6 @@ import (
     "os"
 )
 
-//go:embed adapters/node/index.js
-var nodeRequire2 string
 
 func ExecuteEcmascriptTestsFs(file *string) *[]byte {
 
@@ -37,9 +35,6 @@ func ExecuteEcmascriptTestsFs(file *string) *[]byte {
 		Platform: 	 api.PlatformNode,
 		Sourcemap:   api.SourceMapInline,
 		Format: 	 format,
-		Banner: map[string]string{
-			"js":  nodeRequire2,
-		  },
 	  })
 	
 	if len(result.Errors) > 0 {

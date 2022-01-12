@@ -1,4 +1,6 @@
-const test = async (name, fn) => {
+export const expect = require('expect');
+
+export const test = async (name, fn) => {
     try {
         await fn();
         console.info(JSON.stringify({

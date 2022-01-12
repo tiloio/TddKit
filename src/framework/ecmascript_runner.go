@@ -1,40 +1,20 @@
 package main
 
 import (
+	"bytes"
 	_ "embed"
 	"log"
 	"os/exec"
-	"bytes"
+
 	"github.com/evanw/esbuild/pkg/api"
 )
-
-//go:embed adapters/node/index.js
-var nodeRequire string
 
 func ExecuteEcmascriptTests(file *string) *[]byte {
 
 	log.Println("FILE", *file)
 
-	format := api.FormatCommonJS
+	result := api.Build(esBuildOptions(file))
 
-	if *EsModule {
-		format = api.FormatESModule
-	}
-
-	result := api.Build(api.BuildOptions{
-		EntryPoints: []string{*file},
-		Write:       false,
-		Outdir:      "out",
-		Bundle:      true,
-		Platform: 	 api.PlatformNode,
-		Sourcemap:   api.SourceMapInline,
-		Format: 	 format,
-		Banner: map[string]string{
-			"js":  nodeRequire,
-		  },
-		LegalComments: api.LegalCommentsNone,
-	  })
-	
 	if len(result.Errors) > 0 {
 		log.Println("Could not parse files via esbuild, got erros:")
 		log.Fatal(result.Errors)
@@ -67,4 +47,32 @@ func ExecuteEcmascriptTests(file *string) *[]byte {
 	}
 
 	return &stdoutAndStderr
+}
+
+func esBuildOptions(file *string) api.BuildOptions {
+	var options = api.BuildOptions{
+		EntryPoints:   []string{*file},
+		Write:         false,
+		Outdir:        "out",
+		Bundle:        true,
+		Platform:      api.PlatformNode,
+		Sourcemap:     api.SourceMapInline,
+		Format:        api.FormatCommonJS,
+		LegalComments: api.LegalCommentsNone,
+	}
+
+	if *EsModule {
+		options.Format = api.FormatESModule
+	}
+
+	if jestLegacy := JestLegacyInjections(); jestLegacy != nil {
+		options.Banner = map[string]string{
+			"js": *jestLegacy.prefix,
+		}
+		options.Footer = map[string]string{
+			"js": *jestLegacy.suffix,
+		}
+	}
+
+	return options
 }

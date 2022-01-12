@@ -10,7 +10,7 @@ ESM=${2:-false}
 GLOB=${3:-$DEFAULT_GLOB}
 EXECUTABLE="$DIR/src/framework"
 
-echo "Run $EXECUTABLE go run . -path \"$TEST_PATH\" -glob \"$GLOB\" -esm=$ESM"
+echo "Run $EXECUTABLE go run . -path \"$TEST_PATH\" -glob \"$GLOB\" -esm=$ESM -jest"
 
 cd "$EXECUTABLE"
-time go run . -path "$TEST_PATH" -glob "$GLOB" -esm=$ESM
+time go run . -path "$TEST_PATH" -glob "$GLOB" -esm=$ESM -jest

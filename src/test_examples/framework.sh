@@ -12,7 +12,7 @@ echo "Running FRAMEWORK $TIMES times on $TARGET_DIR"
 
 perfRun() {
     for (( i = 0; i < $TIMES; i++ )); do
-        $EXECUTABLE -path $TARGET_DIR  > /dev/null 2>&1
+        $EXECUTABLE -path $TARGET_DIR -jest  > /dev/null 2>&1
     done
 }
 

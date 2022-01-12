@@ -1,21 +1,21 @@
 package main
 
 import (
-	_ "embed"
-	"log"
 	"bytes"
+	_ "embed"
 	"encoding/json"
+	"log"
 	"path/filepath"
 )
 
 type TestResult struct {
 	Name string `json:"name"`
-	Err string `json:"err,omitempty"`
+	Err  string `json:"err,omitempty"`
 }
 
 type FileResult struct {
-	tests int 
-	errors int 
+	tests  int
+	errors int
 }
 
 var byteNewLine = []byte("\n")
@@ -27,7 +27,6 @@ func RunTest(file *string, resultChannel chan FileResult) {
 	}
 
 	stdout := ExecuteEcmascriptTests(&absolutePath)
-
 
 	var fileResult = FileResult{tests: 0, errors: 0}
 

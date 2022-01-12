@@ -3,11 +3,14 @@ package main
 import (
 	"bytes"
 	_ "embed"
+	"flag"
 	"log"
 	"os/exec"
 
 	"github.com/evanw/esbuild/pkg/api"
 )
+
+var esModule = flag.Bool("esm", false, "Is code es module?")
 
 func ExecuteEcmascriptTests(file *string) *[]byte {
 
@@ -28,7 +31,7 @@ func ExecuteEcmascriptTests(file *string) *[]byte {
 	}
 
 	var cmd *exec.Cmd
-	if *EsModule {
+	if *esModule {
 		cmd = exec.Command("node", "--enable-source-maps", "--input-type=module", "-")
 	} else {
 		cmd = exec.Command("node", "--enable-source-maps", "-")
@@ -61,7 +64,7 @@ func esBuildOptions(file *string) api.BuildOptions {
 		LegalComments: api.LegalCommentsNone,
 	}
 
-	if *EsModule {
+	if *esModule {
 		options.Format = api.FormatESModule
 	}
 

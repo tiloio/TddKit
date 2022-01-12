@@ -3,13 +3,14 @@ package main
 import (
 	_ "embed"
 	"log"
-	"path/filepath"
 	"os/exec"
-	// "bytes"
-	"github.com/evanw/esbuild/pkg/api"
-    "os"
-)
+	"path/filepath"
 
+	// "bytes"
+	"os"
+
+	"github.com/evanw/esbuild/pkg/api"
+)
 
 func ExecuteEcmascriptTestsFs(file *string) *[]byte {
 
@@ -17,26 +18,26 @@ func ExecuteEcmascriptTestsFs(file *string) *[]byte {
 
 	format := api.FormatCommonJS
 
-	if *EsModule {
+	if *esModule {
 		format = api.FormatESModule
 	}
 
 	tempDir, err := os.MkdirTemp("", "test-framework")
 	defer os.RemoveAll(tempDir)
 
-	const testFileName  = "test.js"
+	const testFileName = "test.js"
 	var testFilePath = filepath.Join(tempDir, testFileName)
 
 	result := api.Build(api.BuildOptions{
 		EntryPoints: []string{*file},
 		Write:       true,
-		Outfile: 	testFilePath,
+		Outfile:     testFilePath,
 		Bundle:      true,
-		Platform: 	 api.PlatformNode,
+		Platform:    api.PlatformNode,
 		Sourcemap:   api.SourceMapInline,
-		Format: 	 format,
-	  })
-	
+		Format:      format,
+	})
+
 	if len(result.Errors) > 0 {
 		log.Println("Could not parse files via esbuild, got erros:")
 		log.Fatal(result.Errors)
@@ -50,7 +51,7 @@ func ExecuteEcmascriptTestsFs(file *string) *[]byte {
 	}
 
 	var cmd *exec.Cmd
-	if *EsModule {
+	if *esModule {
 		cmd = exec.Command("node", "--enable-source-maps", "--input-type=module", testFilePath)
 	} else {
 		cmd = exec.Command("node", "--enable-source-maps", testFilePath)

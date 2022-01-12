@@ -90,6 +90,7 @@ Server has to run everytime in background
 - [ ] `Run /Users/tilo/workspace/test-framework/src/framework go run . -path "../test_examples/max" -glob "/**/*.test.[tj]s" -esm=true` fails with `Error: Dynamic require of "assert" is not supported` -> does not appear if we run it on the file system 🤷🏽‍♂️
 - [ ] exclude efficiently node_modules folder while searching for tests - or allow folders to ignore.
 - [ ] jest - support option (injects test, describe, expect, etc.) - our version should use a explicit import to avoid the injection at beginning of the tests. This will also allow to disable the tests in the discover phase with a environment variable like `TEST_FRAMEWORK_PHASE=DISCOVERY`.
+- [ ] heavy init test example: A example which tests if its faster to run jest or this framework if there is a initialization thing which would only be once by jest.
 
 ## Performance
 

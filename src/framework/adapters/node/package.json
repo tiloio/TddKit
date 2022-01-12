@@ -1,11 +1,16 @@
 {
-  "name": "node",
+  "name": "test-framework",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "npm run build.jest-legacy",
-    "build.jest-legacy": "esbuild jest-legacy-prefix.js --platform=node --format=cjs --bundle --outfile=dist/jest-legacy-prefix.js"
+    "build": "npm run build.jest-legacy && npm run build.package && npm run build.types",
+    "build.jest-legacy": "esbuild jest-legacy-prefix.js --platform=node --format=cjs --bundle --outfile=dist/jest-legacy-prefix.js",
+    "build.package": "esbuild package.ts --platform=node --format=cjs --bundle --outfile=dist/package.js",
+    "build.types": "tsc --emitDeclarationOnly --declaration --outDir dist package.ts"
+  },
+  "exports": {
+    ".": "./dist/package.js"
   },
   "keywords": [],
   "author": "",
@@ -14,6 +19,7 @@
     "expect": "^27.4.6"
   },
   "devDependencies": {
-    "esbuild": "^0.14.11"
+    "esbuild": "^0.14.11",
+    "typescript": "^4.5.4"
   }
 }

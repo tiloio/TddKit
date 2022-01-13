@@ -1,3 +1,3 @@
 const { TestDependencies: TestDependency } = require('test-framework');
 
-exports.aTestDependency = TestDependency(__filename);
+exports.aTestDependency = TestDependency("a");

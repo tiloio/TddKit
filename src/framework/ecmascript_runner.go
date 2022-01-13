@@ -3,32 +3,12 @@ package main
 import (
 	"bytes"
 	_ "embed"
-	"flag"
 	"log"
+	"os"
 	"os/exec"
-
-	"github.com/evanw/esbuild/pkg/api"
 )
 
-var esModule = flag.Bool("esm", false, "Is code es module?")
-
-func ExecuteEcmascriptTests(file *string) *[]byte {
-
-	log.Println("FILE", *file)
-
-	result := api.Build(esBuildOptions(file))
-
-	if len(result.Errors) > 0 {
-		log.Println("Could not parse files via esbuild, got erros:")
-		log.Fatal(result.Errors)
-	}
-	if len(result.OutputFiles) != 1 {
-		log.Println("Could not parse files via esbuild, got zero or more than one OutputFile:")
-		for _, out := range result.OutputFiles {
-			log.Printf("%v\n%v\n", out.Path, string(out.Contents))
-		}
-		log.Fatal("")
-	}
+func ExecuteEcmascriptTests(testCode *[]byte, environmentVariables *[]string) *[]byte {
 
 	var cmd *exec.Cmd
 	if *esModule {
@@ -36,46 +16,20 @@ func ExecuteEcmascriptTests(file *string) *[]byte {
 	} else {
 		cmd = exec.Command("node", "--enable-source-maps", "-")
 	}
+	cmd.Env = os.Environ()
+	cmd.Env = append(cmd.Env, *environmentVariables...)
 
 	buffer := bytes.Buffer{}
-	buffer.Write(result.OutputFiles[0].Contents)
+	buffer.Write(*testCode)
 	cmd.Stdin = &buffer
 	stdoutAndStderr, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Println("Command finished with error:", err)
 		log.Println("Executed file:")
-		log.Println(string(result.OutputFiles[0].Contents))
+		log.Println(string(*testCode))
 		log.Println("Command output")
 		log.Fatal(string(stdoutAndStderr))
 	}
 
 	return &stdoutAndStderr
-}
-
-func esBuildOptions(file *string) api.BuildOptions {
-	var options = api.BuildOptions{
-		EntryPoints:   []string{*file},
-		Write:         false,
-		Outdir:        "out",
-		Bundle:        true,
-		Platform:      api.PlatformNode,
-		Sourcemap:     api.SourceMapInline,
-		Format:        api.FormatCommonJS,
-		LegalComments: api.LegalCommentsNone,
-	}
-
-	if *esModule {
-		options.Format = api.FormatESModule
-	}
-
-	if jestLegacy := JestLegacyInjections(); jestLegacy != nil {
-		options.Banner = map[string]string{
-			"js": *jestLegacy.prefix,
-		}
-		options.Footer = map[string]string{
-			"js": *jestLegacy.suffix,
-		}
-	}
-
-	return options
 }

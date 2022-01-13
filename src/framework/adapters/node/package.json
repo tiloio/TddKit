@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "npm run build.jest-legacy && npm run build.package && npm run build.types",
-    "build.jest-legacy": "esbuild jest-legacy-prefix.js --platform=node --format=cjs --bundle --outfile=dist/jest-legacy-prefix.js",
+    "build.jest-legacy": "esbuild jest-legacy-prefix.ts --platform=node --format=cjs --bundle --outfile=dist/jest-legacy-prefix.js",
     "build.package": "esbuild package.ts --platform=node --format=cjs --bundle --outfile=dist/package.js",
     "build.types": "tsc --emitDeclarationOnly --declaration --outDir dist package.ts"
   },

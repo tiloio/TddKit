@@ -2,23 +2,45 @@ package main
 
 import (
 	_ "embed"
+	"flag"
 	"log"
 )
 
+var esModule = flag.Bool("esm", false, "Is code es module?")
 
 func RunAllTests(files *[]string) {
 	var filesLength = len(*files)
-	ch := make(chan FileResult, filesLength)
+	parsedFileChannel := make(chan ParsedFile, filesLength)
 
-	for index, _ := range *files {
-		var file = &(*files)[index]
-		go RunTest(file, ch)
+	for _, file := range *files {
+		go ParseFileAsync(file, esModule, parsedFileChannel)
 	}
 
-	var result = FileResult{tests: 0, errors: 0}
+	var parsedFiles = make([]ParsedFile, filesLength)
 
 	for i := 0; i < filesLength; i++ {
-		currentResult := <-ch
+		parsedFiles[i] = <-parsedFileChannel
+	}
+
+	discoveryResultCh := make(chan DiscoveryResult, filesLength)
+	for _, file := range parsedFiles {
+		go RunDiscoveryPhase(file, discoveryResultCh)
+	}
+
+	discoveryResults := make([]DiscoveryResult, filesLength)
+	for index, _ := range discoveryResults {
+		discoveryResults[index] = <-discoveryResultCh
+	}
+	log.Println("Discovery resulsts", discoveryResults)
+
+	testResultCh := make(chan TestResult, filesLength)
+	for _, file := range parsedFiles {
+		go RunTest(file, testResultCh)
+	}
+
+	var result = TestResult{tests: 0, errors: 0}
+	for i := 0; i < filesLength; i++ {
+		currentResult := <-testResultCh
 		result.tests = result.tests + currentResult.tests
 		result.errors = result.errors + currentResult.errors
 	}

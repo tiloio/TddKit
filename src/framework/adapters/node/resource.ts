@@ -1,3 +1,5 @@
+import { isDiscoveryPhase } from "./env";
+
 export type Resource = {
     id: string,
     create: () => Promise<void>,
@@ -6,6 +8,8 @@ export type Resource = {
 }
 
 export const TestResources = async (resources: Resource[]) => {
+    if (!isDiscoveryPhase) return;
+
     // todo check recursivly all dependent resources are created like in dependencies (maybe use the same method)
     return await Promise.all(resources.map(resource => resource.create()))
 }

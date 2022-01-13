@@ -1,47 +1,37 @@
 package main
 
 import (
-	"bytes"
 	_ "embed"
 	"encoding/json"
 	"log"
-	"path/filepath"
 )
 
 type TestResult struct {
-	Name string `json:"name"`
-	Err  string `json:"err,omitempty"`
-}
-
-type FileResult struct {
 	tests  int
 	errors int
 }
 
+type TestLog struct {
+	Name string `json:"name"`
+	Err  string `json:"err,omitempty"`
+}
+
 var byteNewLine = []byte("\n")
+var environmentVariables = []string{TEST_PHASE_ENVIRONMENT_VAIRABLE}
 
-func RunTest(file *string, resultChannel chan FileResult) {
-	absolutePath, err := filepath.Abs(*file)
-	if err != nil {
-		log.Fatal("Could not read file:", err)
-	}
+func RunTest(file ParsedFile, resultChannel chan TestResult) {
+	stdout := ExecuteEcmascriptTests(&file.content, &environmentVariables)
 
-	stdout := ExecuteEcmascriptTests(&absolutePath)
+	var fileResult = TestResult{tests: 0, errors: 0}
 
-	var fileResult = FileResult{tests: 0, errors: 0}
+	var logs = ReadLogs(stdout)
 
-	// todo rewrite to one loop
-	var resultJsons = bytes.Split(*stdout, byteNewLine)
-	var results = make([]TestResult, cap(resultJsons))
-	for index, resultJson := range resultJsons {
-
-		if len(resultJson) == 0 {
-			continue
-		}
+	var results = make([]TestLog, len(logs))
+	for index, logMsg := range logs {
 		var currentResult = results[index]
-		err := json.Unmarshal(resultJson, &currentResult)
+		err := json.Unmarshal(logMsg, &currentResult)
 		if err != nil {
-			log.Println("Could not parse result:", err)
+			log.Fatalln("RunTest: Could not parse result:", err)
 		}
 		fileResult.tests = fileResult.tests + 1
 

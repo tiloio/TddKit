@@ -7,7 +7,9 @@ import (
 )
 
 type DiscoveryResult struct {
-	Dependencies []Dependency
+	file       ParsedFile
+	dependency Dependency
+	resources  []Resource
 }
 
 type Dependency struct {
@@ -15,9 +17,21 @@ type Dependency struct {
 	Dependencies []Dependency `json:"dependencies"`
 }
 
+type Resources struct {
+	Resources []Resource `json:"resources"`
+}
+
+type Resource struct {
+	Id        string     `json:"id"`
+	Resources []Resource `json:"resources"`
+}
+
 type DiscoveryLog struct {
 	Type string `json:"type"`
 }
+
+const DEPENDENCY_TYPE = "DEPENDENCY"
+const RESOURCE_TYPE = "RESOURCE"
 
 var newLineAsByte = []byte("\n")
 var discoveryEnvironmentVariables = []string{DISCOVERY_PHASE_ENVIRONMENT_VAIRABLE}
@@ -27,7 +41,8 @@ func RunDiscoveryPhase(file ParsedFile, resultCh chan DiscoveryResult) {
 
 	var logs = ReadLogs(stdout)
 
-	var dependencies = []Dependency{}
+	var dependency = Dependency{}
+	var resources = Resources{}
 	for _, logMsg := range logs {
 
 		var dicoveryLog = DiscoveryLog{}
@@ -36,16 +51,20 @@ func RunDiscoveryPhase(file ParsedFile, resultCh chan DiscoveryResult) {
 		}
 
 		switch dicoveryLog.Type {
-		case "DEPENDENCY":
-			var dependency = Dependency{}
+		case DEPENDENCY_TYPE:
 			if err := json.Unmarshal(logMsg, &dependency); err != nil {
 				log.Fatalln("RunDiscovery: Could not parse dependency:", err)
 			}
-			dependencies = append(dependencies, dependency)
+		case RESOURCE_TYPE:
+			if err := json.Unmarshal(logMsg, &resources); err != nil {
+				log.Fatalln("RunDiscovery: Could not parse dependency:", err)
+			}
 		}
 	}
 
 	resultCh <- DiscoveryResult{
-		Dependencies: dependencies,
+		file:       file,
+		dependency: dependency,
+		resources:  resources.Resources,
 	}
 }

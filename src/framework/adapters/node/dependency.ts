@@ -1,25 +1,22 @@
-import { sendMessage } from "./communicate";
-import { isDiscoveryPhase } from "./env"
+import { sendDiscoveryDependenciesMessage } from "./communicate";
+import { currentTestId, isDiscoveryPhase, isTestPhase } from "./env"
+import { activateTests } from "./test";
+import { Dependency } from "./types";
 
-export type Dependency = {
-    id: string,
-    dependencies: Dependency[]
-}
 
 export const TestDependencies = (id: string, ...dependencies: Dependency[]): Dependency => {
+    if (isTestPhase) {
+        if (id === currentTestId) activateTests();
+        return;
+    }
     if (!isDiscoveryPhase) return;
 
-    const dependency = {
+    const dependency: Dependency = {
         id,
         dependencies
     };
 
-    if (dependencies.length > 0) {
-        sendMessage(JSON.stringify({
-            type: "DEPENDENCY",
-            ...dependency
-        }));
-    }
+    if (dependencies.length > 0) sendDiscoveryDependenciesMessage(dependency);
 
 
     // todo check recursivly all dependent dependencies are created like in resources (maybe use the same method)

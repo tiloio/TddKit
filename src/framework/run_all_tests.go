@@ -31,11 +31,10 @@ func RunAllTests(files *[]string) {
 	for index, _ := range discoveryResults {
 		discoveryResults[index] = <-discoveryResultCh
 	}
-	log.Println("Discovery resulsts", discoveryResults)
 
 	testResultCh := make(chan TestResult, filesLength)
-	for _, file := range parsedFiles {
-		go RunTest(file, testResultCh)
+	for _, discoveryResult := range discoveryResults {
+		go RunTest(discoveryResult, testResultCh)
 	}
 
 	var result = TestResult{tests: 0, errors: 0}

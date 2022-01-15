@@ -19,8 +19,11 @@ type TestLog struct {
 var byteNewLine = []byte("\n")
 var environmentVariables = []string{TEST_PHASE_ENVIRONMENT_VAIRABLE}
 
-func RunTest(file ParsedFile, resultChannel chan TestResult) {
-	stdout := ExecuteEcmascriptTests(&file.content, &environmentVariables)
+func RunTest(discoveryResult DiscoveryResult, resultChannel chan TestResult) {
+	log.Println("Running test of", discoveryResult.dependency.Id)
+
+	var environment = append(environmentVariables, TEST_ID_ENVIRONMENT_VARIABLE+"="+discoveryResult.dependency.Id)
+	stdout := ExecuteEcmascriptTests(&discoveryResult.file.content, &environment)
 
 	var fileResult = TestResult{tests: 0, errors: 0}
 

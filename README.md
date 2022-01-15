@@ -91,6 +91,10 @@ Server has to run everytime in background
 - [ ] exclude efficiently node_modules folder while searching for tests - or allow folders to ignore.
 - [ ] jest - support option (injects test, describe, expect, etc.) - our version should use a explicit import to avoid the injection at beginning of the tests. This will also allow to disable the tests in the discover phase with a environment variable like `TEST_FRAMEWORK_PHASE=DISCOVERY`.
 - [ ] heavy init test example: A example which tests if its faster to run jest or this framework if there is a initialization thing which would only be once by jest.
+- [x] multiple calls of `TestDependencies` and `TestRescources` in one test file. `-->` use last log to be able to use `TestDependencies` and depend on it.
+- [x] when we use the Object from `TestDependencies` to describe dependencies and import it into another test file we end up in stacking these files together. So if test `a` uses test `b` and we build and execute test `a` test `b` would be execute before test `a` is executed. This is not a problem, this would even help us. But if we have also a test `c` which depends on test `b`, then both test `a` and `c` would execute test `b`. This will lead to unessecary executions. `-->` We set a env variable with the dependency name and make the test only active after the dependency creation of the given ID has run.
+- [ ] Error if there are two dependencies with the same name.
+- [ ] Try to use only one esbuild call with all found test files as multiple entry points. This maybe speeds everything up and can be handle on file level. Maybe we also can use a virtual file system like FS.embed does to not rely on disk writes and reads which will definitly slow the process.
 
 ## Performance
 

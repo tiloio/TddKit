@@ -1,2 +1,3 @@
-export * from './resource'
-export * from './dependency'
+export * from './resource';
+export * from './dependency';
+export * from './test';

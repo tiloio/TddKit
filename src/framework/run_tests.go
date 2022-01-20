@@ -7,8 +7,10 @@ import (
 )
 
 type TestResult struct {
-	tests  int
-	errors int
+	discoveryResult DiscoveryResult
+	tests           int
+	errors          int
+	dependencyError bool
 }
 
 type TestLog struct {
@@ -20,12 +22,16 @@ var byteNewLine = []byte("\n")
 var environmentVariables = []string{TEST_PHASE_ENVIRONMENT_VAIRABLE}
 
 func RunTest(discoveryResult DiscoveryResult, resultChannel chan TestResult) {
-	log.Println("Running test of", discoveryResult.dependency.Id)
+	log.Println("Running test of", discoveryResult.File.Name, discoveryResult.Dependency.Id)
 
-	var environment = append(environmentVariables, TEST_ID_ENVIRONMENT_VARIABLE+"="+discoveryResult.dependency.Id)
-	stdout := ExecuteEcmascriptTests(&discoveryResult.file.content, &environment)
+	var environment = append(environmentVariables, TEST_ID_ENVIRONMENT_VARIABLE+"="+discoveryResult.Dependency.Id)
+	stdout := ExecuteEcmascriptTests(&discoveryResult.File.content, &environment)
 
-	var fileResult = TestResult{tests: 0, errors: 0}
+	var fileResult = TestResult{
+		tests:           0,
+		errors:          0,
+		discoveryResult: discoveryResult,
+	}
 
 	var logs = ReadLogs(stdout)
 

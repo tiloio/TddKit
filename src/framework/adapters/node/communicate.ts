@@ -12,6 +12,11 @@ export const sendDiscoveryDependenciesMessage = (dependency: Dependency) => send
     ...dependency
 });
 
+export const sendDiscoveryTestMessage = (name: string) => sendObjectMessage({
+    type: DiscoveryType.test,
+    name,
+});
+
 
 const toDiscoveredResource = (resource: Resource) => ({
     id: resource.id,

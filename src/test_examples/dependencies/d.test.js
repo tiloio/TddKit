@@ -1,8 +1,8 @@
 const { TestDependencies: TestDependency, test } = require('test-framework');
 const { aTest } = require('./a.test');
 
-exports.bTest = TestDependency("b", aTest);
+exports.dTest = TestDependency("d", aTest);
 
 test("a test", () => {
-    return true;
+    throw new Error('FAILED!');
 });

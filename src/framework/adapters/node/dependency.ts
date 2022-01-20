@@ -16,7 +16,7 @@ export const TestDependencies = (id: string, ...dependencies: Dependency[]): Dep
         dependencies
     };
 
-    if (dependencies.length > 0) sendDiscoveryDependenciesMessage(dependency);
+    sendDiscoveryDependenciesMessage(dependency);
 
 
     // todo check recursivly all dependent dependencies are created like in resources (maybe use the same method)

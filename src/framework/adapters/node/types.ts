@@ -17,5 +17,6 @@ export type DiscoveredResource = {
 
 export enum DiscoveryType  {
     dependency = 'DEPENDENCY',
-    resource = 'RESOURCE'
+    resource = 'RESOURCE',
+    test = 'TEST'
 }

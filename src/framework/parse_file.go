@@ -8,14 +8,14 @@ import (
 )
 
 type ParsedFile struct {
-	name    string
+	Name    string  `json:"id"`
 	content []byte
 }
 
 func ParseFileAsync(file string, isEsModule *bool, fileContent chan ParsedFile) {
 	var content = parseFile(file, isEsModule)
 	fileContent <- ParsedFile{
-		name:    file,
+		Name:    file,
 		content: content,
 	}
 }

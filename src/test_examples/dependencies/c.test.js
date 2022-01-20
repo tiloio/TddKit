@@ -1,7 +1,7 @@
 const { TestDependencies: TestDependency, test } = require('test-framework');
-const { aTest } = require('./a.test');
+const { bTest } = require('./b.test');
 
-exports.bTest = TestDependency("b", aTest);
+exports.cTest = TestDependency("c", bTest);
 
 test("a test", () => {
     return true;

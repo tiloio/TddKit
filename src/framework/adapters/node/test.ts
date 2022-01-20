@@ -1,8 +1,10 @@
-import { sendObjectMessage } from "./communicate";
+import { sendDiscoveryTestMessage, sendObjectMessage } from "./communicate";
+import { isDiscoveryPhase } from "./env";
 
 let testActive = false;
 
 export const test = async (name, fn) => {
+    if (isDiscoveryPhase) sendDiscoveryTestMessage(name);
     if (!testActive) return;
 
     try {

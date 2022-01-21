@@ -21,6 +21,8 @@ var esModule = flag.Bool("esm", false, "Is code es module?")
 func RunAllTests(files *[]string) {
 	var filesLength = len(*files)
 	parsedFileChannel := make(chan ParsedFile, filesLength)
+	var logs = make(chan CommandLog)
+	go readAndSaveLogs(logs)
 
 	for _, file := range *files {
 		go ParseFileAsync(file, esModule, parsedFileChannel)
@@ -34,7 +36,7 @@ func RunAllTests(files *[]string) {
 
 	discoveryResultCh := make(chan DiscoveryResult, filesLength)
 	for _, file := range parsedFiles {
-		go RunDiscoveryPhase(file, discoveryResultCh)
+		go RunDiscoveryPhase(file, discoveryResultCh, logs)
 	}
 
 	var run = TestRun{
@@ -52,12 +54,12 @@ func RunAllTests(files *[]string) {
 	file, _ := json.MarshalIndent(run, "", " ")
 	_ = ioutil.WriteFile("debug.json", file, 0644)
 
-	run.runPossibleTests()
+	run.runPossibleTests(logs)
 
 	log.Println("Currently running", len(run.Running))
 	for len(run.Running) != 0 {
 		run.evaluateRunningTest()
-		run.runPossibleTests()
+		run.runPossibleTests(logs)
 	}
 
 	var tests = 0
@@ -99,7 +101,7 @@ const (
 	ALL_DEPENDENCIES_FINISHED = 1
 )
 
-func (run *TestRun) runPossibleTests() {
+func (run *TestRun) runPossibleTests(logs chan CommandLog) {
 
 	var leftoverResults = make([]DiscoveryResult, 0)
 
@@ -124,7 +126,7 @@ func (run *TestRun) runPossibleTests() {
 		}
 
 		run.Running = append(run.Running, result)
-		go RunTest(result, run.resultChannel)
+		go RunTest(result, run.resultChannel, logs)
 	}
 
 	run.DiscoveryResults = leftoverResults

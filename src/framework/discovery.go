@@ -34,6 +34,11 @@ type DiscoveryLog struct {
 	Type string `json:"type"`
 }
 
+type LogMessage struct {
+	discoveryLog DiscoveryLog
+	message      CommandLog
+}
+
 const DEPENDENCY_TYPE = "DEPENDENCY"
 const RESOURCE_TYPE = "RESOURCE"
 const TEST_TYPE = "TEST"
@@ -41,10 +46,9 @@ const TEST_TYPE = "TEST"
 var newLineAsByte = []byte("\n")
 var discoveryEnvironmentVariables = []string{DISCOVERY_PHASE_ENVIRONMENT_VAIRABLE}
 
-func RunDiscoveryPhase(file ParsedFile, resultCh chan DiscoveryResult) {
-	stdout := ExecuteEcmascriptTests(&file.content, &discoveryEnvironmentVariables)
-
-	var logs = ReadLogs(stdout)
+func RunDiscoveryPhase(file ParsedFile, resultCh chan DiscoveryResult, logger chan CommandLog) {
+	var logs = make(chan CommandLog)
+	go ExecuteEcmascriptTests(&file.content, &discoveryEnvironmentVariables, logs)
 
 	var result = DiscoveryResult{
 		File:  file,
@@ -52,39 +56,52 @@ func RunDiscoveryPhase(file ParsedFile, resultCh chan DiscoveryResult) {
 	}
 
 	var lastDependencLogIndex = 0
+	var logMessages = make([]LogMessage, 0)
 
-	for index, logMsg := range logs {
+	for logMsg := range logs {
+		logger <- logMsg
+		logMessage := string(logMsg.message)
 
-		var dicoveryLog = DiscoveryLog{}
-		if err := json.Unmarshal(logMsg, &dicoveryLog); err != nil {
-			log.Fatalln("RunDiscovery: Could not parse discovery log:", err)
+		if logMsg.stderr {
+			log.Println(file.Name, "ERR:", logMessage)
+		} else {
+			log.Println(file.Name+":", logMessage)
 		}
 
-		switch dicoveryLog.Type {
-		case DEPENDENCY_TYPE:
-			if err := json.Unmarshal(logMsg, &result.Dependency); err != nil {
-				log.Fatalln("RunDiscovery: Could not parse dependency:", err)
-			}
-			lastDependencLogIndex = index
+		if !logMsg.framework {
+			continue
+		}
+
+		var dicoveryLog = DiscoveryLog{}
+		if err := json.Unmarshal(logMsg.message, &dicoveryLog); err != nil {
+			log.Fatalln("RunDiscovery: Could not parse discovery log:'", logMessage, "' Err:", err)
+		}
+
+		logMessages = append(logMessages, LogMessage{
+			discoveryLog: dicoveryLog,
+			message:      logMsg,
+		})
+
+		if dicoveryLog.Type == DEPENDENCY_TYPE {
+			lastDependencLogIndex = len(logMessages) - 1
 		}
 	}
 
-	for i := lastDependencLogIndex; i < len(logs); i++ {
-		var logMsg = logs[i]
+	for i := lastDependencLogIndex; i < len(logMessages); i++ {
+		var logMsg = logMessages[i]
 
-		var dicoveryLog = DiscoveryLog{}
-		if err := json.Unmarshal(logMsg, &dicoveryLog); err != nil {
-			log.Fatalln("RunDiscovery: Could not parse discovery log:", err)
-		}
-
-		switch dicoveryLog.Type {
+		switch logMsg.discoveryLog.Type {
+		case DEPENDENCY_TYPE:
+			if err := json.Unmarshal(logMsg.message.message, &result.Dependency); err != nil {
+				log.Fatalln("RunDiscovery: Could not parse dependency:", err)
+			}
 		case RESOURCE_TYPE:
-			if err := json.Unmarshal(logMsg, &result.Resources); err != nil {
+			if err := json.Unmarshal(logMsg.message.message, &result.Resources); err != nil {
 				log.Fatalln("RunDiscovery: Could not parse dependency:", err)
 			}
 		case TEST_TYPE:
 			var test = Test{}
-			if err := json.Unmarshal(logMsg, &test); err != nil {
+			if err := json.Unmarshal(logMsg.message.message, &test); err != nil {
 				log.Fatalln("RunDiscovery: Could not parse test:", err)
 			}
 			result.Tests = append(result.Tests, test)

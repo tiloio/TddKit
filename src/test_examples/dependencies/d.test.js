@@ -1,7 +1,7 @@
-const { TestDependencies: TestDependency, test } = require('test-framework');
+const { TestSuite, test } = require('test-framework');
 const { aTest } = require('./a.test');
 
-exports.dTest = TestDependency("d", aTest);
+exports.dTest = TestSuite("d", {dependencies: [aTest]});
 
 test("a test", () => {
     throw new Error('FAILED!');

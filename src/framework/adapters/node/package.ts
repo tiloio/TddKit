@@ -1,3 +1,2 @@
-export * from './resource';
-export * from './dependency';
+export * from './discovery';
 export * from './test';

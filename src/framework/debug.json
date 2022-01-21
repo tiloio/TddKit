@@ -1,0 +1,40 @@
+{
+ "discoveryResults": [
+  {
+   "file": {
+    "id": "../test_examples/simple/hello-internet.test.js"
+   },
+   "tests": [
+    {
+     "name": "returns internet name"
+    }
+   ],
+   "dependency": {
+    "id": "",
+    "dependencies": null
+   },
+   "resources": null
+  },
+  {
+   "file": {
+    "id": "../test_examples/simple/hello-world.test.js"
+   },
+   "tests": [
+    {
+     "name": "returns name"
+    },
+    {
+     "name": "some failing test"
+    }
+   ],
+   "dependency": {
+    "id": "",
+    "dependencies": null
+   },
+   "resources": null
+  }
+ ],
+ "running": [],
+ "errors": [],
+ "finished": []
+}

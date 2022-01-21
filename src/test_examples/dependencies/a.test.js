@@ -1,6 +1,6 @@
-const { TestDependencies: TestDependency, test } = require('test-framework');
+const { TestSuite, test } = require('test-framework');
 
-exports.aTest = TestDependency("a");
+exports.aTest = TestSuite("a");
 
 test("a test", () => {
     return true;

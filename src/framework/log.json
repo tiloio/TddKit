@@ -1,0 +1,36 @@
+{
+ "time": 1642804680932,
+ "stderr": false,
+ "framework": true,
+ "message": "{\"type\":\"TEST\",\"name\":\"returns internet name\"}"
+}
+{
+ "time": 1642804680934,
+ "stderr": false,
+ "framework": true,
+ "message": "{\"type\":\"TEST\",\"name\":\"returns name\"}"
+}
+{
+ "time": 1642804680934,
+ "stderr": false,
+ "framework": true,
+ "message": "{\"type\":\"TEST\",\"name\":\"some failing test\"}"
+}
+{
+ "time": 1642804681002,
+ "stderr": false,
+ "framework": true,
+ "message": "{\"name\":\"returns internet name\"}"
+}
+{
+ "time": 1642804681005,
+ "stderr": false,
+ "framework": true,
+ "message": "{\"name\":\"some failing test\",\"err\":\"{\\\"message\\\":\\\"'Hello test framework' == 'Hello test'\\\"}\"}"
+}
+{
+ "time": 1642804681005,
+ "stderr": false,
+ "framework": true,
+ "message": "{\"name\":\"returns name\"}"
+}

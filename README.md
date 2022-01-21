@@ -98,7 +98,7 @@ Server has to run everytime in background
 - [x] Count tests in discovery
 - [ ] Visualize dependencies
 - [ ] discover cross dependencies 
-- [ ] define dependencies and resources in one function for discovery to be able to say when the wanted tests, dependency and resources starts .
+- [x] define dependencies and resources in one function for discovery to be able to say when the wanted tests, dependency and resources starts. -> TestSuite defines dependencies and resources.
 
 ## Performance
 

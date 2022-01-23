@@ -47,8 +47,11 @@ var newLineAsByte = []byte("\n")
 var discoveryEnvironmentVariables = []string{DISCOVERY_PHASE_ENVIRONMENT_VAIRABLE}
 
 func RunDiscoveryPhase(file ParsedFile, resultCh chan DiscoveryResult, logger chan CommandLog) {
-	var logs = make(chan CommandLog)
-	go ExecuteEcmascriptTests(&file.content, &discoveryEnvironmentVariables, logs)
+	var executeLog = ExecuteLog{
+		channel: make(chan CommandLog),
+		typ:     "DISCOVERY",
+	}
+	go ExecuteEcmascriptTests(&file.content, &discoveryEnvironmentVariables, &executeLog)
 
 	var result = DiscoveryResult{
 		File:  file,
@@ -58,7 +61,7 @@ func RunDiscoveryPhase(file ParsedFile, resultCh chan DiscoveryResult, logger ch
 	var lastTestSuiteLogIndex = 0
 	var logMessages = make([]LogMessage, 0)
 
-	for logMsg := range logs {
+	for logMsg := range executeLog.channel {
 		logger <- logMsg
 		logMessage := string(logMsg.message)
 

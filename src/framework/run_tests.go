@@ -26,8 +26,11 @@ func RunTest(discoveryResult DiscoveryResult, resultChannel chan TestResult, log
 
 	var environment = append(environmentVariables, TEST_ID_ENVIRONMENT_VARIABLE+"="+discoveryResult.TestSuite.Id)
 
-	var logs = make(chan CommandLog)
-	go ExecuteEcmascriptTests(&discoveryResult.File.content, &environment, logs)
+	var executeLog = ExecuteLog{
+		channel: make(chan CommandLog),
+		typ:     "RUN_TEST",
+	}
+	go ExecuteEcmascriptTests(&discoveryResult.File.content, &environment, &executeLog)
 
 	var fileResult = TestResult{
 		Success:         make([]TestResultLog, 0),
@@ -36,7 +39,7 @@ func RunTest(discoveryResult DiscoveryResult, resultChannel chan TestResult, log
 	}
 
 	var logMessages = make([]CommandLog, 0)
-	for logMsg := range logs {
+	for logMsg := range executeLog.channel {
 		logger <- logMsg
 		if logMsg.framework {
 			var currentResult = TestResultLog{}

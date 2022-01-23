@@ -21,14 +21,20 @@ type ExecuteCommand struct {
 	stderr  *bufio.Scanner
 }
 type CommandLog struct {
-	time      time.Time
-	stderr    bool
-	framework bool
-	message   []byte
-	last      bool
+	time          time.Time
+	stderr        bool
+	framework     bool
+	message       []byte
+	last          bool
+	executionType string
 }
 
-func ExecuteEcmascriptTests(testCode *[]byte, environmentVariables *[]string, logChannel chan CommandLog) {
+type ExecuteLog struct {
+	channel chan CommandLog
+	typ     string
+}
+
+func ExecuteEcmascriptTests(testCode *[]byte, environmentVariables *[]string, executeLog *ExecuteLog) {
 
 	var cmd *exec.Cmd
 	if *esModule {
@@ -41,12 +47,12 @@ func ExecuteEcmascriptTests(testCode *[]byte, environmentVariables *[]string, lo
 
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
-		log.Fatal("Could not read stderr of exec node command!", err)
+		log.Fatal(executeLog.typ, "Could not read stderr of exec node command!", err)
 	}
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		log.Fatal("Could not read stdout of exec node command!", err)
+		log.Fatal(executeLog.typ, "Could not read stdout of exec node command!", err)
 	}
 
 	var execCommand = ExecuteCommand{
@@ -57,14 +63,14 @@ func ExecuteEcmascriptTests(testCode *[]byte, environmentVariables *[]string, lo
 
 	var finishedLogReadsChannel = make(chan int)
 
-	go execCommand.readLogs(logChannel, finishedLogReadsChannel)
+	go execCommand.readLogs(executeLog, finishedLogReadsChannel)
 
 	buffer := bytes.Buffer{}
 	buffer.Write(*testCode)
 	cmd.Stdin = &buffer
 
 	if err := cmd.Start(); err != nil {
-		log.Fatal("Could not start exec node command", err)
+		log.Fatal(executeLog.typ, "Could not start exec node command", err)
 	}
 
 	for i := 0; i < 1; i++ {
@@ -72,26 +78,26 @@ func ExecuteEcmascriptTests(testCode *[]byte, environmentVariables *[]string, lo
 	}
 
 	if err := cmd.Wait(); err != nil {
-		log.Fatal("Exec node command failed", err)
+		log.Fatal(executeLog.typ, "Exec node command failed", err)
 	}
 }
 
-func (command *ExecuteCommand) readLogs(logChannel chan CommandLog, finishedLogReadsChannel chan int) {
+func (command *ExecuteCommand) readLogs(executeLog *ExecuteLog, finishedLogReadsChannel chan int) {
 	var combinedChannel = make(chan CommandLog)
 
-	go scanLog(command.stderr, true, combinedChannel)
-	go scanLog(command.stdout, false, combinedChannel)
+	go scanLog(command.stderr, true, combinedChannel, executeLog.typ)
+	go scanLog(command.stdout, false, combinedChannel, executeLog.typ)
 
 	var lastLogCounter = 0
 	for msg := range combinedChannel {
 		if msg.last {
 			lastLogCounter++
 		} else {
-			logChannel <- msg
+			executeLog.channel <- msg
 		}
 
 		if lastLogCounter == 2 {
-			close(logChannel)
+			close(executeLog.channel)
 			finishedLogReadsChannel <- 1
 			return
 		}
@@ -99,11 +105,11 @@ func (command *ExecuteCommand) readLogs(logChannel chan CommandLog, finishedLogR
 
 }
 
-func scanLog(scanner *bufio.Scanner, stderr bool, logChannel chan CommandLog) {
+func scanLog(scanner *bufio.Scanner, stderr bool, logChannel chan CommandLog, executionType string) {
 	scanner.Split(bufio.ScanLines)
 	for scanner.Scan() {
 		if err := scanner.Err(); err != nil {
-			log.Panicln("Log scan error", err)
+			log.Panicln(executionType, "Log scan error", err)
 		}
 
 		if len(scanner.Bytes()) == 0 {
@@ -111,10 +117,11 @@ func scanLog(scanner *bufio.Scanner, stderr bool, logChannel chan CommandLog) {
 		}
 
 		var log = CommandLog{
-			time:      time.Now(),
-			stderr:    stderr,
-			framework: false,
-			message:   make([]byte, len(scanner.Bytes())),
+			time:          time.Now(),
+			stderr:        stderr,
+			framework:     false,
+			executionType: executionType,
+			message:       make([]byte, len(scanner.Bytes())),
 		}
 
 		copy(log.message, scanner.Bytes())

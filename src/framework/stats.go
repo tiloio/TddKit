@@ -12,6 +12,7 @@ type StatLogMessage struct {
 	Time      int64  `json:"time"`
 	Stderr    bool   `json:"stderr"`
 	Framework bool   `json:"framework"`
+	Type      string `json:"type"`
 	Message   string `json:"message"`
 }
 
@@ -41,6 +42,7 @@ func readAndSaveLogs(logs chan CommandLog) {
 			Time:      logMsg.time.UnixMilli(),
 			Stderr:    logMsg.stderr,
 			Framework: logMsg.framework,
+			Type:      logMsg.executionType,
 			Message:   string(logMsg.message),
 		}
 

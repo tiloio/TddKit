@@ -16,11 +16,9 @@ type TestRun struct {
 
 var esModule = flag.Bool("esm", false, "Is code es module?")
 
-func RunAllTests(files *[]string) {
+func RunAllTests(files *[]string, logs chan CommandLog) {
 	var filesLength = len(*files)
 	parsedFileChannel := make(chan ParsedFile, filesLength)
-	var logs = make(chan CommandLog)
-	go readAndSaveLogs(logs)
 
 	for _, file := range *files {
 		go ParseFileAsync(file, esModule, parsedFileChannel)

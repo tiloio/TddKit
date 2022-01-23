@@ -8,7 +8,10 @@ import (
 func main() {
 	flag.Parse()
 
+	var logs = make(chan CommandLog)
+	go readAndSaveLogs(logs)
+
 	var files = SearchFiles()
 
-	RunAllTests(files)
+	RunAllTests(files, logs)
 }

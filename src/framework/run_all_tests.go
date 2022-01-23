@@ -2,9 +2,7 @@ package main
 
 import (
 	_ "embed"
-	"encoding/json"
 	"flag"
-	"io/ioutil"
 	"log"
 )
 
@@ -39,6 +37,7 @@ func RunAllTests(files *[]string) {
 		go RunDiscoveryPhase(file, discoveryResultCh, logs)
 	}
 
+	var statsChannel = make(chan Stats)
 	var run = TestRun{
 		DiscoveryResults: make([]DiscoveryResult, filesLength),
 		Running:          make([]DiscoveryResult, 0),
@@ -46,13 +45,12 @@ func RunAllTests(files *[]string) {
 		Finished:         make([]TestResult, 0),
 		resultChannel:    make(chan TestResult, filesLength),
 	}
+	go readAndSaveCurrentStats(statsChannel)
 
 	for index := range run.DiscoveryResults {
 		run.DiscoveryResults[index] = <-discoveryResultCh
+		go transmitStat(statsChannel, run)
 	}
-
-	file, _ := json.MarshalIndent(run, "", " ")
-	_ = ioutil.WriteFile("debug.json", file, 0644)
 
 	run.runPossibleTests(logs)
 
@@ -60,16 +58,18 @@ func RunAllTests(files *[]string) {
 	for len(run.Running) != 0 {
 		run.evaluateRunningTest()
 		run.runPossibleTests(logs)
+		go transmitStat(statsChannel, run)
 	}
+	transmitStat(statsChannel, run)
 
 	var tests = 0
 	var erroredTests = 0
 	for _, test := range run.Finished {
-		tests = tests + test.tests
+		tests = tests + len(test.Success)
 	}
 	for _, test := range run.Errors {
-		tests = tests + test.tests
-		erroredTests = erroredTests + test.errors
+		tests = tests + len(test.Success) + len(test.Errors)
+		erroredTests = erroredTests + len(test.Errors)
 	}
 
 	log.Println(len(run.Finished)+len(run.Errors), "Files -", len(run.Errors), "Failed")
@@ -80,8 +80,8 @@ func (run *TestRun) evaluateRunningTest() {
 	currentResult := <-run.resultChannel
 
 	for index, discoveryItem := range run.Running {
-		if discoveryItem.File.Name == currentResult.discoveryResult.File.Name {
-			if currentResult.errors == 0 {
+		if discoveryItem.File.Name == currentResult.DiscoveryResult.File.Name {
+			if len(currentResult.Errors) == 0 {
 				run.Finished = append(run.Finished, currentResult)
 			} else {
 				run.Errors = append(run.Errors, currentResult)
@@ -92,7 +92,7 @@ func (run *TestRun) evaluateRunningTest() {
 		}
 	}
 
-	log.Panicln("Finished test not found in running tests:", currentResult.discoveryResult.File.Name)
+	log.Panicln("Finished test not found in running tests:", currentResult.DiscoveryResult.File.Name)
 }
 
 const (
@@ -107,7 +107,7 @@ func (run *TestRun) runPossibleTests(logs chan CommandLog) {
 
 	for _, result := range run.DiscoveryResults {
 
-		var dependencyStatus = CheckDependencies(result, run.Errors, run.Finished)
+		var dependencyStatus, dependency = CheckDependencies(result, run.Errors, run.Finished)
 		log.Println("dependencyStatus", result.File.Name, dependencyStatus)
 
 		if dependencyStatus == STILL_WAITING {
@@ -115,41 +115,38 @@ func (run *TestRun) runPossibleTests(logs chan CommandLog) {
 			continue
 		}
 		if dependencyStatus == ERRORED_DEPENDENCY {
-			failedTests := len(result.Tests)
 			run.Errors = append(run.Errors, TestResult{
-				discoveryResult: result,
-				dependencyError: true,
-				tests:           failedTests,
-				errors:          failedTests,
+				DiscoveryResult:   result,
+				DependencyErrored: *dependency,
 			})
 			continue
 		}
 
-		run.Running = append(run.Running, result)
 		go RunTest(result, run.resultChannel, logs)
+		run.Running = append(run.Running, result)
 	}
 
 	run.DiscoveryResults = leftoverResults
 }
 
-func CheckDependencies(result DiscoveryResult, errors []TestResult, finished []TestResult) int {
+func CheckDependencies(result DiscoveryResult, errors []TestResult, finished []TestResult) (int, *Dependency) {
 	for _, dependency := range result.Dependency.Dependencies {
 
 		if resultMachtes(errors, dependency.Id) {
-			return ERRORED_DEPENDENCY
+			return ERRORED_DEPENDENCY, &dependency
 		}
 
 		if !resultMachtes(finished, dependency.Id) {
-			return STILL_WAITING
+			return STILL_WAITING, &dependency
 		}
 	}
 
-	return ALL_DEPENDENCIES_FINISHED
+	return ALL_DEPENDENCIES_FINISHED, nil
 }
 
 func resultMachtes(s []TestResult, id string) bool {
 	for _, result := range s {
-		if id == result.discoveryResult.Dependency.Id {
+		if id == result.DiscoveryResult.Dependency.Id {
 			return true
 		}
 	}

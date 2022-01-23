@@ -23,6 +23,5 @@ export const TestSuite = (id: string, options?: TestSuiteOptions): Dependency =>
     if (options?.resources?.length > 0) sendDiscoveryResourcesMessage(options.resources);
 
 
-    // todo check recursivly all dependent dependencies are created like in resources (maybe use the same method)
     return dependency
 }

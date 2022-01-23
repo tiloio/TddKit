@@ -14,8 +14,8 @@ type DiscoveryResult struct {
 }
 
 type Dependency struct {
-	Id           string       `json:"id"`
-	Dependencies []Dependency `json:"dependencies"`
+	Id           string       `json:"id,omitempty"`
+	Dependencies []Dependency `json:"dependencies,omitempty"`
 }
 
 type Resources struct {

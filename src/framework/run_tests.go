@@ -7,10 +7,10 @@ import (
 )
 
 type TestResult struct {
-	discoveryResult DiscoveryResult
-	tests           int
-	errors          int
-	dependencyError bool
+	DiscoveryResult   DiscoveryResult `json:"discoveryResult"`
+	Success           []TestResultLog `json:"success"`
+	Errors            []TestResultLog `json:"errors"`
+	DependencyErrored Dependency      `json:"dependencyErrored,omitempty"`
 }
 
 type TestResultLog struct {
@@ -30,12 +30,11 @@ func RunTest(discoveryResult DiscoveryResult, resultChannel chan TestResult, log
 	go ExecuteEcmascriptTests(&discoveryResult.File.content, &environment, logs)
 
 	var fileResult = TestResult{
-		tests:           0,
-		errors:          0,
-		discoveryResult: discoveryResult,
+		Success:         make([]TestResultLog, 0),
+		Errors:          make([]TestResultLog, 0),
+		DiscoveryResult: discoveryResult,
 	}
 
-	var results = make([]TestResultLog, 0)
 	var logMessages = make([]CommandLog, 0)
 	for logMsg := range logs {
 		logger <- logMsg
@@ -46,14 +45,14 @@ func RunTest(discoveryResult DiscoveryResult, resultChannel chan TestResult, log
 			if err != nil {
 				log.Fatalln("RunTest: Could not parse result:", err)
 			}
-			fileResult.tests = fileResult.tests + 1
 
 			if currentResult.Err != "" {
-				fileResult.errors = fileResult.errors + 1
+				fileResult.Errors = append(fileResult.Errors, currentResult)
 				log.Println("Test '", currentResult.Name, "' failed!", currentResult.Err)
+			} else {
+				fileResult.Success = append(fileResult.Success, currentResult)
 			}
 
-			results = append(results, currentResult)
 		}
 		logMessages = append(logMessages, logMsg)
 	}

@@ -3,6 +3,6 @@ const { bTest } = require('./b.test');
 
 exports.cTest = TestSuite("c", {dependencies: [bTest]});
 
-test("a test", () => {
+test("c test", () => {
     return true;
 });

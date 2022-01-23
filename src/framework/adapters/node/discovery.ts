@@ -1,27 +1,21 @@
-import { sendDiscoveryDependenciesMessage, sendDiscoveryResourcesMessage } from "./communicate";
+import { sendDiscoveryTestSuiteMessage } from "./communicate";
 import { currentTestId, isDiscoveryPhase, isTestPhase } from "./env"
 import { activateTests } from "./test";
-import { Dependency, Resource } from "./types";
+import { TestSuiteCreateOptions, TestSuiteType } from "./types";
 
-export type TestSuiteOptions = {
-    dependencies?: Dependency[],
-    resources?: Resource[]
-}
-export const TestSuite = (id: string, options?: TestSuiteOptions): Dependency => {
+export const TestSuite = (id: string, options?: TestSuiteCreateOptions): TestSuiteType => {
     if (isTestPhase) {
         if (id === currentTestId) activateTests();
         return;
     }
     if (!isDiscoveryPhase) return;
 
-    const dependency: Dependency = {
+    const suite: TestSuiteType = {
         id,
-        dependencies: options?.dependencies ?? []
+        dependencies: options?.dependencies ?? [],
+        resources: options?.resources ?? [],
     };
+    sendDiscoveryTestSuiteMessage(suite);
 
-    sendDiscoveryDependenciesMessage(dependency);
-    if (options?.resources?.length > 0) sendDiscoveryResourcesMessage(options.resources);
-
-
-    return dependency
+    return suite
 }

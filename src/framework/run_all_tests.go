@@ -130,7 +130,7 @@ func (run *TestRun) runPossibleTests(logs chan CommandLog) {
 }
 
 func CheckDependencies(result DiscoveryResult, errors []TestResult, finished []TestResult) (int, *Dependency) {
-	for _, dependency := range result.Dependency.Dependencies {
+	for _, dependency := range result.TestSuite.Dependencies {
 
 		if resultMachtes(errors, dependency.Id) {
 			return ERRORED_DEPENDENCY, &dependency
@@ -146,7 +146,7 @@ func CheckDependencies(result DiscoveryResult, errors []TestResult, finished []T
 
 func resultMachtes(s []TestResult, id string) bool {
 	for _, result := range s {
-		if id == result.DiscoveryResult.Dependency.Id {
+		if id == result.DiscoveryResult.TestSuite.Id {
 			return true
 		}
 	}

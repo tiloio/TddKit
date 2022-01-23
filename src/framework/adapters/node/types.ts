@@ -10,13 +10,23 @@ export type Resource = {
     resources: Resource[]
 }
 
+export type TestSuiteType = {
+    id: string;
+    dependencies: Dependency[];
+    resources: Resource[];
+}
+
+export type TestSuiteCreateOptions = {
+    dependencies?: Dependency[],
+    resources?: Resource[]
+}
+
 export type DiscoveredResource = {
     id: string,
     resources: DiscoveredResource[]
 }
 
-export enum DiscoveryType  {
-    dependency = 'DEPENDENCY',
-    resource = 'RESOURCE',
-    test = 'TEST'
+export enum DiscoveryType {
+    TestSuite = 'TESTSUITE',
+    Test = 'TEST'
 }

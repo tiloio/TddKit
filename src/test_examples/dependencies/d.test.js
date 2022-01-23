@@ -3,6 +3,6 @@ const { aTest } = require('./a.test');
 
 exports.dTest = TestSuite("d", {dependencies: [aTest]});
 
-test("a test", () => {
+test("d test", () => {
     throw new Error('FAILED!');
 });

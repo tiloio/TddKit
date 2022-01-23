@@ -22,9 +22,9 @@ var byteNewLine = []byte("\n")
 var environmentVariables = []string{TEST_PHASE_ENVIRONMENT_VAIRABLE}
 
 func RunTest(discoveryResult DiscoveryResult, resultChannel chan TestResult, logger chan CommandLog) {
-	log.Println("Running test of", discoveryResult.File.Name, discoveryResult.Dependency.Id)
+	log.Println("Running test of", discoveryResult.File.Name, discoveryResult.TestSuite.Id)
 
-	var environment = append(environmentVariables, TEST_ID_ENVIRONMENT_VARIABLE+"="+discoveryResult.Dependency.Id)
+	var environment = append(environmentVariables, TEST_ID_ENVIRONMENT_VARIABLE+"="+discoveryResult.TestSuite.Id)
 
 	var logs = make(chan CommandLog)
 	go ExecuteEcmascriptTests(&discoveryResult.File.content, &environment, logs)

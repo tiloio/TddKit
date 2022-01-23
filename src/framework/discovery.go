@@ -7,19 +7,20 @@ import (
 )
 
 type DiscoveryResult struct {
-	File       ParsedFile `json:"file"`
-	Tests      []Test     `json:"tests"`
-	Dependency Dependency `json:"dependency"`
-	Resources  []Resource `json:"resources"`
+	File      ParsedFile `json:"file"`
+	TestSuite TestSuite  `json:"testSuite"`
+	Tests     []Test     `json:"tests"`
+}
+
+type TestSuite struct {
+	Id           string       `json:"id"`
+	Dependencies []Dependency `json:"dependencies"`
+	Resources    []Resource   `json:"resources"`
 }
 
 type Dependency struct {
 	Id           string       `json:"id,omitempty"`
 	Dependencies []Dependency `json:"dependencies,omitempty"`
-}
-
-type Resources struct {
-	Resources []Resource `json:"resources"`
 }
 
 type Resource struct {
@@ -39,8 +40,7 @@ type LogMessage struct {
 	message      CommandLog
 }
 
-const DEPENDENCY_TYPE = "DEPENDENCY"
-const RESOURCE_TYPE = "RESOURCE"
+const TESTSUITE_TYPE = "TESTSUITE"
 const TEST_TYPE = "TEST"
 
 var newLineAsByte = []byte("\n")
@@ -55,7 +55,7 @@ func RunDiscoveryPhase(file ParsedFile, resultCh chan DiscoveryResult, logger ch
 		Tests: make([]Test, 0),
 	}
 
-	var lastDependencLogIndex = 0
+	var lastTestSuiteLogIndex = 0
 	var logMessages = make([]LogMessage, 0)
 
 	for logMsg := range logs {
@@ -82,22 +82,18 @@ func RunDiscoveryPhase(file ParsedFile, resultCh chan DiscoveryResult, logger ch
 			message:      logMsg,
 		})
 
-		if dicoveryLog.Type == DEPENDENCY_TYPE {
-			lastDependencLogIndex = len(logMessages) - 1
+		if dicoveryLog.Type == TESTSUITE_TYPE {
+			lastTestSuiteLogIndex = len(logMessages) - 1
 		}
 	}
 
-	for i := lastDependencLogIndex; i < len(logMessages); i++ {
+	for i := lastTestSuiteLogIndex; i < len(logMessages); i++ {
 		var logMsg = logMessages[i]
 
 		switch logMsg.discoveryLog.Type {
-		case DEPENDENCY_TYPE:
-			if err := json.Unmarshal(logMsg.message.message, &result.Dependency); err != nil {
-				log.Fatalln("RunDiscovery: Could not parse dependency:", err)
-			}
-		case RESOURCE_TYPE:
-			if err := json.Unmarshal(logMsg.message.message, &result.Resources); err != nil {
-				log.Fatalln("RunDiscovery: Could not parse dependency:", err)
+		case TESTSUITE_TYPE:
+			if err := json.Unmarshal(logMsg.message.message, &result.TestSuite); err != nil {
+				log.Fatalln("RunDiscovery: Could not parse test suite:", err)
 			}
 		case TEST_TYPE:
 			var test = Test{}

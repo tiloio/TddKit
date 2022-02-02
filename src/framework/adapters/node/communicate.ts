@@ -1,5 +1,4 @@
-import { Dependency, DiscoveredResource, DiscoveryType, Resource, TestSuiteType } from "./types";
-
+import { DiscoveryType, Resource, ResourceCreated, TestSuiteDiscoveryType, TestSuiteType } from "./types";
 
 const LOG_PREFIX = "__TFW:"
 
@@ -7,7 +6,7 @@ export const sendMessage = (message: string) => console.log(LOG_PREFIX + message
 
 export const sendObjectMessage = (obj: any) => sendMessage(JSON.stringify(obj));
 
-export const sendDiscoveryTestSuiteMessage = (suite: TestSuiteType) => sendObjectMessage({
+export const sendDiscoveryTestSuiteMessage = (suite: TestSuiteDiscoveryType) => sendObjectMessage({
     type: DiscoveryType.TestSuite,
     id: suite.id,
     dependencies: suite.dependencies,
@@ -19,6 +18,9 @@ export const sendDiscoveryTestMessage = (name: string) => sendObjectMessage({
     name,
 });
 
+export const sendResourceCreatedMessage = (options: ResourceCreated) => sendObjectMessage({
+    data: JSON.stringify(options.data)
+});
 
 const toDiscoveredResource = (resource: Resource) => ({
     id: resource.id,

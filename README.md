@@ -18,7 +18,7 @@ Test phases (defined through environment variable `TEST_FRAMEWORK_PHASE` in the 
 4. (Not execute for single file tests.) Build graph of dependencies and resources and in parallel<br>
    Create the needed resources    
 5. Run test files with `TEST_FRAMEWORK_PHASE=TEST_RUN` and `TEST_FRAMEWORK_ID=SOME_ID` to
-    - optinal wait until all exclusive resources are free (then lock them for this run),
+    - optional wait until all exclusive resources are free (then lock them for this run),
     - initialize the needed resources with the `TEST_FRAMEWORK_ID` before each test executes and
     - wait for tests finishes.<br>
    In parallel:<br>

@@ -1,4 +1,4 @@
-package main
+package ecmascript
 
 import (
 	_ "embed"
@@ -7,7 +7,7 @@ import (
 
 var jestLegacyFlag = flag.Bool("jest", false, "Enables running tests written in the jest format.")
 
-//go:embed adapters/node/dist/jest-legacy-prefix.js
+//go:embed node/dist/jest-legacy-prefix.js
 var prefixInjections string
 var suffixInjections string
 
@@ -21,7 +21,7 @@ var injections = JestLegacyInjection{
 	suffix: &suffixInjections,
 }
 
-func JestLegacyInjections() *JestLegacyInjection {
+func jestLegacyInjections() *JestLegacyInjection {
 	if *jestLegacyFlag {
 		return &injections
 	}
